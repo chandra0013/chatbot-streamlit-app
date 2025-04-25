@@ -1,68 +1,68 @@
 pipeline {
-  agent {
-    docker {
-      image 'python:3.10'
-      args '-p 8501:8501'
+    agent any
+    
+    environment {
+        // Define any environment variables you need here
     }
 
-  }
-  stages {
-    stage('Clone') {
-      parallel {
-        stage('Clone') {
-          steps {
-            git 'https://github.com/your-username/your-repo.git'
-          }
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout the code from GitHub
+                checkout scm
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    // Ensure Python environment and install dependencies from requirements.txt
+                    sh 'python3 -m venv venv'
+                    sh './venv/bin/pip install -r requirements.txt'
+                }
+            }
         }
 
-        stage('Shell Script') {
-          steps {
-            sh '''git clone https://github.com/chandra0013/chatbot-streamlit-app.git
-cd chatbot-streamlit-app
-'''
-          }
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Run tests (using pytest or unittest)
+                    sh './venv/bin/python -m pytest tests/test_dummy.py'
+                }
+            }
         }
 
-      }
+        stage('Build') {
+            steps {
+                script {
+                    // Any additional build steps if needed
+                    echo 'Building the chatbot project...'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    // Optional: Add deployment steps here
+                    echo 'Deploying chatbot application...'
+                }
+            }
+        }
     }
 
-    stage('Install Requirements') {
-      parallel {
-        stage('Install Requirements') {
-          steps {
-            sh 'pip install -r requirements.txt'
-          }
+    post {
+        always {
+            // Actions to perform after pipeline run (e.g., clean up)
+            echo 'Pipeline completed!'
         }
-
-        stage('Shell Script') {
-          steps {
-            sh '''cd chatbot-streamlit-app
-pip install -r requirements.txt
-'''
-          }
+        success {
+            // Actions to perform on successful pipeline execution
+            echo 'Pipeline was successful!'
         }
-
-      }
+        failure {
+            // Actions to perform if pipeline fails
+            echo 'Pipeline failed!'
+        }
     }
-
-    stage('Run Streamlit App') {
-      parallel {
-        stage('Run Streamlit App') {
-          steps {
-            sh 'streamlit run app.py --server.port=8501'
-          }
-        }
-
-        stage('Shell Script') {
-          steps {
-            sh '''cd chatbot-streamlit-app
-streamlit run app.py --server.port=8501
-'''
-          }
-        }
-
-      }
-    }
-
-  }
 }
